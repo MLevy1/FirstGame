@@ -13,6 +13,30 @@
         canvas {
             display: block;
         }
+
+        button {
+            position: fixed;
+            bottom: 30px;
+            width: 75px;
+            height: 75px;
+            font-size: 30px;
+            background: #333333aa;
+            color: white;
+            border: 1px solid white;
+            border-radius: 12px;
+            touch-action: none;
+            user-select: none;
+            z-index: 10;
+        }
+
+        #left {
+            left: 20px;
+        }
+
+        #right {
+            left: 110px;
+        }
+
     </style>
 </head>
 <body>
@@ -102,6 +126,24 @@ document.body.appendChild(renderer.domElement);
 
 let previousTime = performance.now();
 
+let direction = 0;
+
+function bindMovement(id, value) {
+
+    const button = document.getElementById(id);
+
+    button.addEventListener("pointerdown", (event) => {
+        button.setPointerCapture(event.pointerId);
+        direction = value;
+    });
+
+    button.addEventListener("lostpointercapture", () => {
+        if (direction === value) direction = 0;
+    });
+}
+
+bindMovement("left", -1);
+bindMovement("right", 1);
 renderer.setAnimationLoop((time) => {
 
     const delta = Math.min(
@@ -110,7 +152,7 @@ renderer.setAnimationLoop((time) => {
 
     previousTime = time;
 
-    moveCharacter(player, 1, delta);
+    moveCharacter(player, direction, delta);
 
     renderer.render(scene, camera);
 });
