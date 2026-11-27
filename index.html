@@ -61,7 +61,12 @@ function createCharacter(color) {
 
 const player = createCharacter(0x3366cc);
 player.position.set(0, 0, 5);
+
 scene.add(player);
+
+const opponent = createCharacter(0xcc3333);
+opponent.position.set(0, 0, -5);
+scene.add(opponent);
 
 const camera = new THREE.PerspectiveCamera(
     60,
