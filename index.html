@@ -24,12 +24,27 @@ import * as THREE from
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x808080);
 
+const floor = new THREE.Mesh(
+    new THREE.PlaneGeometry(12, 16),
+    new THREE.MeshBasicMaterial({color: 0x555555})
+);
+
+floor.rotation.x = -Math.PI / 2;
+scene.add(floor);
+
+const grid = new THREE.GridHelper(12, 12);
+grid.position.y = 0.01;
+scene.add(grid);
+
 const camera = new THREE.PerspectiveCamera(
     60,
     window.innerWidth / window.innerHeight,
     0.1,
     100
 );
+
+camera.position.set(0, 5, 11);
+camera.lookAt(0, 0, 0);
 
 const renderer = new THREE.WebGLRenderer({
     antialias: true
