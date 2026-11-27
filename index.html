@@ -66,7 +66,18 @@ scene.add(player);
 
 const opponent = createCharacter(0xcc3333);
 opponent.position.set(0, 0, -5);
+
 scene.add(opponent);
+
+function moveCharacter(character, direction, delta) {
+    const speed = 4;
+
+    character.position.x += direction * speed * delta;
+
+    character.position.x = THREE.MathUtils.clamp(
+        character.position.x, -5, 5
+    );
+}
 
 const camera = new THREE.PerspectiveCamera(
     60,
@@ -89,9 +100,21 @@ renderer.setSize(
 
 document.body.appendChild(renderer.domElement);
 
-renderer.setAnimationLoop(() => {
+let previousTime = performance.now();
+
+renderer.setAnimationLoop((time) => {
+
+    const delta = Math.min(
+        (time - previousTime) / 1000, 0.05
+    );
+
+    previousTime = time;
+
+    moveCharacter(player, 1, delta);
+
     renderer.render(scene, camera);
 });
+
 </script>
 
 </body>
