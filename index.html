@@ -14,38 +14,49 @@
             display: block;
         }
 
-        button {
-            position: fixed;
-            bottom: 30px;
-            width: 75px;
-            height: 75px;
-            font-size: 30px;
-            background: #333333aa;
-            color: white;
-            border: 1px solid white;
-            border-radius: 12px;
-            touch-action: none;
-            user-select: none;
-            z-index: 10;
-        }
 
-        #left {
-            left: 20px;
-        }
 
-        #right {
-            left: 110px;
-        }
+button {
+    position: fixed;
+    bottom: 30px;
+    width: 75px;
+    height: 75px;
+    font-size: 30px;
+    background: #333333aa;
+    color: white;
+    border: 1px solid white;
+    border-radius: 12px;
+    touch-action: none;
+    user-select: none;
+    z-index: 10;
+}
 
+#left {
+    left: 20px;
+}
+
+#right {
+    left: 110px;
+}
+
+* {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: none;
+}
     </style>
 </head>
 <body>
-
+<button id="left"><</button>
+<button id="right">></button>
 <script type="module">
 import * as THREE from
     'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js';
 
 const scene = new THREE.Scene();
+
 scene.background = new THREE.Color(0x808080);
 
 const floor = new THREE.Mesh(
@@ -54,10 +65,13 @@ const floor = new THREE.Mesh(
 );
 
 floor.rotation.x = -Math.PI / 2;
+
 scene.add(floor);
 
 const grid = new THREE.GridHelper(12, 12);
+
 grid.position.y = 0.01;
+
 scene.add(grid);
 
 function createCharacter(color) {
@@ -84,11 +98,13 @@ function createCharacter(color) {
 }
 
 const player = createCharacter(0x3366cc);
+
 player.position.set(0, 0, 5);
 
 scene.add(player);
 
 const opponent = createCharacter(0xcc3333);
+
 opponent.position.set(0, 0, -5);
 
 scene.add(opponent);
@@ -110,9 +126,6 @@ const camera = new THREE.PerspectiveCamera(
     100
 );
 
-camera.position.set(0, 10, 20);
-camera.lookAt(0, 0, 0);
-
 const renderer = new THREE.WebGLRenderer({
     antialias: true
 });
@@ -124,15 +137,40 @@ renderer.setSize(
 
 document.body.appendChild(renderer.domElement);
 
-let previousTime = performance.now();
+function resizeGame() {
+
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    camera.aspect = width / height;
+
+    if (camera.aspect >= 1.3) {
+        camera.position.set(0, 5, 11);
+    } else {
+        camera.position.set(0, 10, 20);
+    }
+
+    camera.lookAt(0, 0, 0);
+    camera.updateProjectionMatrix();
+
+    renderer.setSize(width, height);
+}
+
+window.addEventListener("resize", resizeGame);
+
+resizeGame();
+
 
 let direction = 0;
+
+let opponentDirection = 1;
 
 function bindMovement(id, value) {
 
     const button = document.getElementById(id);
 
     button.addEventListener("pointerdown", (event) => {
+	event.preventDefault();
         button.setPointerCapture(event.pointerId);
         direction = value;
     });
@@ -144,6 +182,24 @@ function bindMovement(id, value) {
 
 bindMovement("left", -1);
 bindMovement("right", 1);
+
+window.addEventListener("keydown", (event) => {
+    if (event.key === "ArrowLeft") direction = -1;
+    if (event.key === "ArrowRight") direction = 1;
+});
+
+window.addEventListener("keyup", (event) => {
+    if (event.key === "ArrowLeft" && direction === -1) {
+        direction = 0;
+    }
+
+    if (event.key === "ArrowRight" && direction === 1) {
+        direction = 0;
+    }
+});
+
+let previousTime = performance.now();
+
 renderer.setAnimationLoop((time) => {
 
     const delta = Math.min(
@@ -154,9 +210,19 @@ renderer.setAnimationLoop((time) => {
 
     moveCharacter(player, direction, delta);
 
+
+	moveCharacter(opponent, opponentDirection, delta);
+
+if (opponent.position.x >= 5) {
+    opponentDirection = -1;
+}
+
+if (opponent.position.x <= -5) {
+    opponentDirection = 1;
+}
+
     renderer.render(scene, camera);
 });
-
 </script>
 
 </body>
